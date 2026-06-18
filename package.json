@@ -1,0 +1,32 @@
+{
+  "name": "discord-image-host",
+  "version": "1.0.0",
+  "description": "MCP server that uploads local images to a Discord channel via webhook and returns the CDN URL.",
+  "type": "module",
+  "bin": {
+    "discord-image-host": "dist/index.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "node --import tsx src/index.ts",
+    "start": "node dist/index.js",
+    "test": "node --import tsx --test test/*.test.ts"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "@cfworker/json-schema": "^4.1.1",
+    "@modelcontextprotocol/sdk": "^1.29.0",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@types/node": "^22.19.21",
+    "tsx": "^4.22.4",
+    "typescript": "^6.0.3"
+  }
+}

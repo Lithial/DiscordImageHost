@@ -1,0 +1,25 @@
+services:
+  discord-image-host:
+    build: .
+    image: discord-image-host:latest
+    container_name: discord-image-host
+    # Start on boot (when the Docker daemon starts) and restart on crash.
+    restart: unless-stopped
+    environment:
+      MCP_TRANSPORT: http
+      PORT: "3939"
+      DISCORD_WEBHOOK_URL: ${DISCORD_WEBHOOK_URL:?set DISCORD_WEBHOOK_URL in .env}
+    # Bind to localhost only — the endpoint can post to your webhook, so it is not
+    # exposed on the network.
+    ports:
+      - "127.0.0.1:3939:3939"
+    # Mount your files read-only at the SAME path so post_image can read them by
+    # absolute path. Scope this to the directory that holds the images you upload.
+    volumes:
+      - "${HOST_FILES_DIR:?set HOST_FILES_DIR in .env}:${HOST_FILES_DIR}:ro"
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "-", "http://127.0.0.1:3939/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 5s

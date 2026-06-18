@@ -1,0 +1,6 @@
+node_modules/
+dist/
+*.log
+
+# Local secrets — the webhook URL is passed via DISCORD_WEBHOOK_URL, never committed.
+.env
