@@ -68,7 +68,10 @@ async function handleHttp(req: IncomingMessage, res: ServerResponse, webhookUrl:
     res.end("ok");
     return;
   }
-  if (pathname !== "/mcp") {
+
+  // Log non-health requests for diagnosability (the /health probe runs often).
+  console.error(`[http] ${req.method ?? "?"} ${pathname} accept=${req.headers.accept ?? "(none)"}`);
+  if (pathname !== "/mcp" && pathname !== "/mcp/") {
     res.writeHead(404, { "content-type": "application/json" });
     res.end(JSON.stringify({ error: "not found" }));
     return;
@@ -88,9 +91,17 @@ async function handleHttp(req: IncomingMessage, res: ServerResponse, webhookUrl:
     return;
   }
 
+  // Be tolerant of clients that send a narrower Accept than the spec's
+  // "application/json, text/event-stream" (omp's HTTP client does). We can serve
+  // either format, so append both. The Node->web Request conversion reads
+  // rawHeaders (not the parsed object), and combines duplicate header names, so
+  // appending here satisfies the transport's strict Accept check regardless.
+  req.rawHeaders.push("Accept", "application/json, text/event-stream");
+
   // Stateless Streamable HTTP: a fresh server + transport per request.
+  // enableJsonResponse returns a plain JSON body (broadly compatible) instead of SSE.
   const server = buildServer(webhookUrl);
-  const transport = new StreamableHTTPServerTransport({ sessionIdGenerator: undefined });
+  const transport = new StreamableHTTPServerTransport({ sessionIdGenerator: undefined, enableJsonResponse: true });
   res.on("close", () => {
     void transport.close();
     void server.close();
