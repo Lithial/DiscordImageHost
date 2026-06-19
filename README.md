@@ -114,6 +114,16 @@ indefinitely, but a bare copied link used for long-term **external** hotlinking 
 eventually return 404 — Discord platform behavior; the tool returns exactly what
 Discord provides.
 
+## Troubleshooting: client shows "not connected"
+
+If your MCP client shows the server disconnected after you add or change it — but
+`curl http://127.0.0.1:3939/health` returns `ok` and `docker compose ps` shows
+`healthy` — the client likely hasn't (re)issued the connection. Some clients' reload
+/ reconnect commands don't reliably pick up a newly added or previously failed HTTP
+server; **fully restart the client process**. (Because the endpoint is stateless, a
+container restart is transparent to a connected client — only the client's *first*
+connection is the finicky part.)
+
 ## Development
 
 ```bash
